@@ -25,15 +25,21 @@ const Grid = (props) => {
   });
   //console.log(grid);
   const [working, setWorking] = useState(false);
-
+  const [generation, setGeneration] = useState(0);
   //stores the reference of the working state
   const workingRef = useRef(working);
   workingRef.current = working;
 
+  const gens = useRef(generation);
+  gens.current = generation;
   const runGOL = useCallback(() => {
     if (!workingRef.current) {
       return;
     }
+
+    setGeneration((gens) => {
+      return (gens = gens + 1);
+    });
 
     //simulation
     //double forloop that goes through every value in grid
@@ -62,7 +68,7 @@ const Grid = (props) => {
     });
 
     setTimeout(runGOL, 1000);
-  }, [props.generations]);
+  }, []);
 
   return (
     <>
@@ -77,6 +83,7 @@ const Grid = (props) => {
       >
         {working ? "Stop Life" : "Give Life"}
       </button>
+      <h2>Generations: {generation}</h2>
       <div
         style={{
           display: "grid",
