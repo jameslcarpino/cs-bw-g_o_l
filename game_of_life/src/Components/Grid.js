@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useRef } from "react";
 import produce from "immer";
 
-const numRows = 25;
-const numCols = 25;
+const numRows = 10;
+const numCols = 10;
 
 const neighbors = [
   [0, 1],
@@ -62,7 +62,7 @@ const Grid = (props) => {
     });
 
     setTimeout(runGOL, 1000);
-  }, []);
+  }, [props.generations]);
 
   return (
     <>
