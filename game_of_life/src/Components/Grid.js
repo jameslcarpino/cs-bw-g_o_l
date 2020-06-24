@@ -23,6 +23,7 @@ const makeEmptyGrid = () => {
 };
 
 const Grid = (props) => {
+  //state lives here
   const [grid, setGrid] = useState(() => {
     return makeEmptyGrid();
   });
@@ -30,12 +31,19 @@ const Grid = (props) => {
   const [working, setWorking] = useState(false);
   const [generation, setGeneration] = useState(0);
 
+  const [freq, setFreq] = useState(1000);
+  //state above
   //stores the reference of the working state
   const workingRef = useRef(working);
   workingRef.current = working;
   //stores the state of the generations state
   const gens = useRef(generation);
   gens.current = generation;
+
+  const changeSpeed = (event) => {
+    const speed = event.target.value;
+    setFreq(speed);
+  };
 
   const runGOL = useCallback(() => {
     if (!workingRef.current) {
@@ -72,7 +80,10 @@ const Grid = (props) => {
       });
     });
 
-    setTimeout(runGOL, 1000);
+    setTimeout(runGOL, changeSpeed(freq));
+    // const oneSec = setTimeout(runGOL, 1000);
+    // const twoSec = setTimeout(runGOL, 2000);
+    // const halfSec = setTimeout(runGOL, 500);
   }, []);
 
   return (
@@ -102,6 +113,32 @@ const Grid = (props) => {
       >
         Reset Life
       </button>
+      <button
+        id="randomButton"
+        disabled={
+          working
+            ? (document.getElementById("randomButton").disabled = true)
+            : false
+        }
+        onClick={() => {
+          const rows = [];
+          for (let i = 0; i < numRows; i++) {
+            rows.push(
+              Array.from(Array(numCols), () => (Math.random() > 0.75 ? 1 : 0))
+            );
+          }
+          setGrid(rows);
+          setGeneration(0);
+        }}
+      >
+        Chaos Generator
+      </button>
+      <label>Speed of Life</label>
+      <select onChange={changeSpeed}>
+        <option value="1000">1 second</option>
+        <option value=".5">1/2 second</option>
+        <option value="5000">2 seconds</option>
+      </select>
       <h2>Generations: {generation}</h2>
       <div
         style={{
@@ -114,10 +151,13 @@ const Grid = (props) => {
             <div
               key={`${index}-${colIdx}}`}
               onClick={() => {
-                const newGrid = produce(grid, (gridCopy) => {
-                  gridCopy[index][colIdx] = grid[index][colIdx] ? 0 : 1;
-                });
-                setGrid(newGrid);
+                //this stops the board from being clickable when its running.
+                if (!working) {
+                  const newGrid = produce(grid, (gridCopy) => {
+                    gridCopy[index][colIdx] = grid[index][colIdx] ? 0 : 1;
+                  });
+                  setGrid(newGrid);
+                }
               }}
               style={{
                 width: 20,
