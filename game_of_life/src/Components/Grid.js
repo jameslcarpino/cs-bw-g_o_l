@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useRef } from "react";
 import produce from "immer";
 
-const numRows = 10;
-const numCols = 10;
+const numRows = 15;
+const numCols = 15;
 
 const neighbors = [
   [0, 1],
@@ -14,24 +14,29 @@ const neighbors = [
   [1, 0],
   [-1, 0],
 ];
+const makeEmptyGrid = () => {
+  const rows = [];
+  for (let i = 0; i < numRows; i++) {
+    rows.push(Array.from(Array(numCols), () => 0));
+  }
+  return rows;
+};
 
 const Grid = (props) => {
   const [grid, setGrid] = useState(() => {
-    const rows = [];
-    for (let i = 0; i < numRows; i++) {
-      rows.push(Array.from(Array(numCols), () => 0));
-    }
-    return rows;
+    return makeEmptyGrid();
   });
   //console.log(grid);
   const [working, setWorking] = useState(false);
   const [generation, setGeneration] = useState(0);
+
   //stores the reference of the working state
   const workingRef = useRef(working);
   workingRef.current = working;
-
+  //stores the state of the generations state
   const gens = useRef(generation);
   gens.current = generation;
+
   const runGOL = useCallback(() => {
     if (!workingRef.current) {
       return;
@@ -82,6 +87,20 @@ const Grid = (props) => {
         }}
       >
         {working ? "Stop Life" : "Give Life"}
+      </button>
+      <button
+        id="resetButton"
+        disabled={
+          working
+            ? (document.getElementById("resetButton").disabled = true)
+            : false
+        }
+        onClick={() => {
+          setGrid(makeEmptyGrid());
+          setGeneration(0);
+        }}
+      >
+        Reset Life
       </button>
       <h2>Generations: {generation}</h2>
       <div
