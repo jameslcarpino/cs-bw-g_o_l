@@ -1,8 +1,14 @@
 import React, { useState, useCallback, useRef } from "react";
 import produce from "immer";
+import {
+  ButtonDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+} from "reactstrap";
 
-const numRows = 15;
-const numCols = 15;
+const numRows = 25;
+const numCols = 25;
 
 const neighbors = [
   [0, 1],
@@ -21,6 +27,8 @@ const makeEmptyGrid = () => {
   }
   return rows;
 };
+var randomColor = require("randomcolor");
+var color = randomColor();
 
 const Grid = (props) => {
   //state lives here
@@ -32,6 +40,11 @@ const Grid = (props) => {
   const [generation, setGeneration] = useState(0);
 
   const [freq, setFreq] = useState(1000);
+  const [cellColor, setCellColor] = useState(color);
+
+  const [dropdownOpen, setOpen] = useState(false);
+  const toggleDropColor = () => setOpen(!dropdownOpen);
+
   //state above
   //refs
   //stores the reference of the working state
@@ -57,7 +70,7 @@ const Grid = (props) => {
     //double forloop that goes through every value in grid
     setGrid((value) => {
       return produce(value, (gridCopy) => {
-        for (let i = 0; i < numRows; i++) {
+        for (let i = 0; i < `${numRows}`; i++) {
           for (let j = 0; j < numCols; j++) {
             let neighbor = 0;
             neighbors.forEach(([x, y]) => {
@@ -132,46 +145,90 @@ const Grid = (props) => {
       >
         Chaos Generator
       </button>
+      <div>
+        <h3>Game Speed Presets:</h3>
 
-      <h3>Game Speed Presets:</h3>
-      <button
-        onClick={() => {
-          setFreq(500);
-        }}
-      >
-        1/2 Second
-      </button>
-      <button
-        onClick={() => {
-          setFreq(freq);
-        }}
-      >
-        1 Second
-      </button>
-      <button
-        onClick={() => {
-          setFreq(2000);
-        }}
-      >
-        2 Seconds
-      </button>
-      <h4>Speed up life by 1/2 second</h4>
-      <button
-        onClick={() => {
-          setFreq(freq - 500);
-        }}
-      >
-        -
-      </button>
-      <h4>Slow down life by 1/2 second</h4>
-      <button
-        onClick={() => {
-          setFreq(freq + 500);
-        }}
-      >
-        +
-      </button>
-
+        <button
+          onClick={() => {
+            setFreq(500);
+          }}
+        >
+          1/2 Second
+        </button>
+        <button
+          onClick={() => {
+            setFreq(freq);
+          }}
+        >
+          1 Second
+        </button>
+        <button
+          onClick={() => {
+            setFreq(2000);
+          }}
+        >
+          2 Seconds
+        </button>
+        <h4>Speed up life by 1/2 second</h4>
+        <button
+          onClick={() => {
+            setFreq(freq - 500);
+          }}
+        >
+          -
+        </button>
+        <h4>Slow down life by 1/2 second</h4>
+        <button
+          onClick={() => {
+            setFreq(freq + 500);
+          }}
+        >
+          +
+        </button>
+      </div>
+      <div>
+        <h5>Choose a color:</h5>
+        <ButtonDropdown isOpen={dropdownOpen} toggle={toggleDropColor}>
+          <DropdownToggle caret>colors</DropdownToggle>
+          <DropdownMenu>
+            <DropdownItem
+              onClick={() => {
+                setCellColor("blue");
+              }}
+            >
+              Blue
+            </DropdownItem>
+            <DropdownItem
+              onClick={() => {
+                setCellColor("yellow");
+              }}
+            >
+              Yellow
+            </DropdownItem>
+            <DropdownItem
+              onClick={() => {
+                setCellColor("green");
+              }}
+            >
+              Green
+            </DropdownItem>
+            <DropdownItem
+              onClick={() => {
+                setCellColor("orange");
+              }}
+            >
+              Orange
+            </DropdownItem>
+            <DropdownItem
+              onClick={() => {
+                setCellColor(color);
+              }}
+            >
+              Random
+            </DropdownItem>
+          </DropdownMenu>
+        </ButtonDropdown>
+      </div>
       <h2>Generations: {generation}</h2>
       <div
         style={{
@@ -195,8 +252,10 @@ const Grid = (props) => {
               style={{
                 width: 20,
                 height: 20,
-                backgroundColor: grid[index][colIdx] ? "blue" : undefined,
-                border: "solid 1px black",
+                backgroundColor: grid[index][colIdx]
+                  ? `${cellColor}`
+                  : undefined,
+                border: `solid 1px black`,
               }}
             />
           ))
