@@ -33,17 +33,16 @@ const Grid = (props) => {
 
   const [freq, setFreq] = useState(1000);
   //state above
+  //refs
   //stores the reference of the working state
   const workingRef = useRef(working);
   workingRef.current = working;
   //stores the state of the generations state
   const gens = useRef(generation);
   gens.current = generation;
-
-  const changeSpeed = (event) => {
-    const speed = event.target.value;
-    setFreq(speed);
-  };
+  //refspeed
+  const freqRef = useRef(freq);
+  freqRef.current = freq;
 
   const runGOL = useCallback(() => {
     if (!workingRef.current) {
@@ -80,7 +79,7 @@ const Grid = (props) => {
       });
     });
 
-    setTimeout(runGOL, changeSpeed(freq));
+    setTimeout(runGOL, freqRef.current);
     // const oneSec = setTimeout(runGOL, 1000);
     // const twoSec = setTimeout(runGOL, 2000);
     // const halfSec = setTimeout(runGOL, 500);
@@ -133,12 +132,46 @@ const Grid = (props) => {
       >
         Chaos Generator
       </button>
-      <label>Speed of Life</label>
-      <select onChange={changeSpeed}>
-        <option value="1000">1 second</option>
-        <option value=".5">1/2 second</option>
-        <option value="5000">2 seconds</option>
-      </select>
+
+      <h3>Game Speed Presets:</h3>
+      <button
+        onClick={() => {
+          setFreq(500);
+        }}
+      >
+        1/2 Second
+      </button>
+      <button
+        onClick={() => {
+          setFreq(freq);
+        }}
+      >
+        1 Second
+      </button>
+      <button
+        onClick={() => {
+          setFreq(2000);
+        }}
+      >
+        2 Seconds
+      </button>
+      <h4>Speed up life by 1/2 second</h4>
+      <button
+        onClick={() => {
+          setFreq(freq - 500);
+        }}
+      >
+        -
+      </button>
+      <h4>Slow down life by 1/2 second</h4>
+      <button
+        onClick={() => {
+          setFreq(freq + 500);
+        }}
+      >
+        +
+      </button>
+
       <h2>Generations: {generation}</h2>
       <div
         style={{
