@@ -8,7 +8,7 @@ import {
 } from "reactstrap";
 
 const numRows = 25;
-const numCols = 25;
+const numCols = 45;
 
 const neighbors = [
   [0, 1],
@@ -27,10 +27,30 @@ const makeEmptyGrid = () => {
   }
   return rows;
 };
-var randomColor = require("randomcolor");
-var color = randomColor();
+
+//allows the edges to wrap using a modulous and then shifting the x y index value to beginning or end depending.
+const countNeighbors = (grid, x, y) => {
+  return neighbors.reduce((acc, [i, j]) => {
+    const newI = (i + x + numRows) % numRows;
+    const newJ = (j + y + numCols) % numCols;
+    acc += grid[newI][newJ];
+    return acc;
+    //checking bounds of the grid
+  }, 0);
+};
+
+const lifeGenCount = (grid) => {
+  for (let i = 0; i < grid.length; i++) {
+    let result = grid[i].find((elem) => elem === 1);
+    if (result === 1) {
+      return result;
+    }
+  }
+};
 
 const Grid = (props) => {
+  var randomColor = require("randomcolor");
+  var color = randomColor();
   //state lives here
   const [grid, setGrid] = useState(() => {
     return makeEmptyGrid();
@@ -40,7 +60,7 @@ const Grid = (props) => {
   const [generation, setGeneration] = useState(0);
 
   const [freq, setFreq] = useState(1000);
-  const [cellColor, setCellColor] = useState(color);
+  const [cellColor, setCellColor] = useState("black");
 
   const [dropdownOpen, setOpen] = useState(false);
   const toggleDropColor = () => setOpen(!dropdownOpen);
@@ -50,6 +70,10 @@ const Grid = (props) => {
   //stores the reference of the working state
   const workingRef = useRef(working);
   workingRef.current = working;
+
+  //check if the grid is running
+  const gridRef = useRef(grid);
+  gridRef.current = grid;
   //stores the state of the generations state
   const gens = useRef(generation);
   gens.current = generation;
@@ -61,26 +85,29 @@ const Grid = (props) => {
     if (!workingRef.current) {
       return;
     }
+    //checks grids current ref if here is any life
+    let lifeCycle = lifeGenCount(gridRef.current);
+    if (lifeCycle === undefined) {
+      setWorking(false);
+      return;
+    }
 
-    setGeneration((gens) => {
-      return (gens = gens + 1);
+    setGeneration((gens, value) => {
+      if (setGrid) {
+        return (gens = gens + 1);
+      } else {
+        return (gens = gens);
+      }
     });
 
     //simulation
     //double forloop that goes through every value in grid
     setGrid((value) => {
       return produce(value, (gridCopy) => {
-        for (let i = 0; i < `${numRows}`; i++) {
+        for (let i = 0; i < numRows; i++) {
           for (let j = 0; j < numCols; j++) {
-            let neighbor = 0;
-            neighbors.forEach(([x, y]) => {
-              const newI = i + x;
-              const newJ = j + y;
-              //checking bounds of the grid
-              if (newI >= 0 && newI < numRows && newJ >= 0 && newJ < numCols) {
-                neighbor += value[newI][newJ];
-              }
-            });
+            let neighbor = countNeighbors(value, i, j);
+
             //game logic for the rules of life
             if (neighbor < 2 || neighbor > 3) {
               gridCopy[i][j] = 0;
@@ -188,7 +215,11 @@ const Grid = (props) => {
       </div>
       <div>
         <h5>Choose a color:</h5>
-        <ButtonDropdown isOpen={dropdownOpen} toggle={toggleDropColor}>
+        <ButtonDropdown
+          color="warning"
+          isOpen={dropdownOpen}
+          toggle={toggleDropColor}
+        >
           <DropdownToggle caret>colors</DropdownToggle>
           <DropdownMenu>
             <DropdownItem

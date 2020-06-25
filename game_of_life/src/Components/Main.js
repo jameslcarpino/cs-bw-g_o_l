@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Grid from "./Grid";
 import Canvas from "./Canvas";
+import Info from "./Info";
 
 const newGame = {
   gridSize: 25,
@@ -18,8 +19,12 @@ const Main = (props) => {
       <h1>Conway's Game of Life</h1>
 
       {/* <Canvas grid={grid} /> */}
-
-      <Grid generations={generations} />
+      <div>
+        <Grid generations={generations} />
+      </div>
+      <div>
+        <Info />
+      </div>
       {/* <h2>Life generations: {generations}</h2> */}
     </div>
   );
