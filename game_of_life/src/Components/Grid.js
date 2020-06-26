@@ -5,10 +5,63 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
+  Button,
+  ButtonToggle,
+  Card,
+  Row,
+  Col,
 } from "reactstrap";
+import styled from "styled-components";
+import Info from "./Info";
 
+//------STYLED COMPONENTS-------//
+const Background = styled.div`
+  background-color: gray;
+  padding: 1%;
+`;
+
+const ControlsCard = styled.div`
+  display: flex;
+  width: 57%;
+  justify-content: space-evenly;
+  alrign-items: flex-start;
+  margin-left: 23%;
+`;
+
+const GameSpeedCard = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  width: 100%;
+  padding-top: 1%;
+`;
+const SpeedTitles = styled.h5`
+  display: flex;
+  width: 100%;
+  justify-content: space-evenly;
+`;
+
+const ColorControlCard = styled.div`
+  display: flex;
+
+  justify-content: space-evenly;
+
+  flex-wrap: wrap;
+  padding-top: 1%;
+`;
+
+const GameBoardCard = styled.div`
+  margin-left: 2%;
+`;
+const GameBoard = styled.div`
+  display: flex;
+  width: 50%;
+  align-items: center;
+  margin-left: 40%;
+`;
+//-----------------------------//
 const numRows = 25;
-const numCols = 45;
+const numCols = 25;
 
 const neighbors = [
   [0, 1],
@@ -60,10 +113,12 @@ const Grid = (props) => {
   const [generation, setGeneration] = useState(0);
 
   const [freq, setFreq] = useState(1000);
-  const [cellColor, setCellColor] = useState("black");
+  const [cellColor, setCellColor] = useState(color);
 
   const [dropdownOpen, setOpen] = useState(false);
   const toggleDropColor = () => setOpen(!dropdownOpen);
+
+  const [population, setPopulation] = useState(0);
 
   //state above
   //refs
@@ -81,6 +136,9 @@ const Grid = (props) => {
   const freqRef = useRef(freq);
   freqRef.current = freq;
 
+  const popRef = useRef(population);
+  popRef.current = population;
+
   const runGOL = useCallback(() => {
     if (!workingRef.current) {
       return;
@@ -92,17 +150,14 @@ const Grid = (props) => {
       return;
     }
 
-    setGeneration((gens, value) => {
-      if (setGrid) {
-        return (gens = gens + 1);
-      } else {
-        return (gens = gens);
-      }
+    setGeneration((gens) => {
+      return (gens = gens + 1);
     });
 
     //simulation
     //double forloop that goes through every value in grid
     setGrid((value) => {
+      //produce allows the state to be held at the point it was made keeping the original state in tact but also holds the previous state(or state that is added too)
       return produce(value, (gridCopy) => {
         for (let i = 0; i < numRows; i++) {
           for (let j = 0; j < numCols; j++) {
@@ -127,171 +182,227 @@ const Grid = (props) => {
 
   return (
     <>
-      <button
-        onClick={() => {
-          setWorking(!working);
-          if (!working) {
-            workingRef.current = true;
-            runGOL();
-          }
-        }}
-      >
-        {working ? "Stop Life" : "Give Life"}
-      </button>
-      <button
-        id="resetButton"
-        disabled={
-          working
-            ? (document.getElementById("resetButton").disabled = true)
-            : false
-        }
-        onClick={() => {
-          setGrid(makeEmptyGrid());
-          setGeneration(0);
-        }}
-      >
-        Reset Life
-      </button>
-      <button
-        id="randomButton"
-        disabled={
-          working
-            ? (document.getElementById("randomButton").disabled = true)
-            : false
-        }
-        onClick={() => {
-          const rows = [];
-          for (let i = 0; i < numRows; i++) {
-            rows.push(
-              Array.from(Array(numCols), () => (Math.random() > 0.75 ? 1 : 0))
-            );
-          }
-          setGrid(rows);
-          setGeneration(0);
-        }}
-      >
-        Chaos Generator
-      </button>
-      <div>
-        <h3>Game Speed Presets:</h3>
+      <Background>
+        <Row>
+          <Col sm="6">
+            <Card
+              body
+              inverse
+              style={{ backgroundColor: "#333", borderColor: "#333" }}
+            >
+              <ControlsCard classname="controls">
+                <ButtonToggle
+                  color="success"
+                  outline
+                  size="sm"
+                  onClick={() => {
+                    setWorking(!working);
+                    if (!working) {
+                      workingRef.current = true;
+                      runGOL();
+                    }
+                  }}
+                >
+                  {working ? "Stop Life" : "Give Life"}
+                </ButtonToggle>
+                <ButtonToggle
+                  color="warning"
+                  outline
+                  size="sm"
+                  id="resetButton"
+                  disabled={
+                    working
+                      ? (document.getElementById("resetButton").disabled = true)
+                      : false
+                  }
+                  onClick={() => {
+                    setGrid(makeEmptyGrid());
+                    setGeneration(0);
+                  }}
+                >
+                  Reset Life
+                </ButtonToggle>
+                <ButtonToggle
+                  color="primary"
+                  outline
+                  size="sm"
+                  id="randomButton"
+                  disabled={
+                    working
+                      ? (document.getElementById(
+                          "randomButton"
+                        ).disabled = true)
+                      : false
+                  }
+                  onClick={() => {
+                    const rows = [];
+                    for (let i = 0; i < numRows; i++) {
+                      rows.push(
+                        Array.from(Array(numCols), () =>
+                          Math.random() > 0.75 ? 1 : 0
+                        )
+                      );
+                    }
+                    setGrid(rows);
+                    setGeneration(0);
+                  }}
+                >
+                  Chaos Generator
+                </ButtonToggle>
+              </ControlsCard>
 
-        <button
-          onClick={() => {
-            setFreq(500);
-          }}
-        >
-          1/2 Second
-        </button>
-        <button
-          onClick={() => {
-            setFreq(freq);
-          }}
-        >
-          1 Second
-        </button>
-        <button
-          onClick={() => {
-            setFreq(2000);
-          }}
-        >
-          2 Seconds
-        </button>
-        <h4>Speed up life by 1/2 second</h4>
-        <button
-          onClick={() => {
-            setFreq(freq - 500);
-          }}
-        >
-          -
-        </button>
-        <h4>Slow down life by 1/2 second</h4>
-        <button
-          onClick={() => {
-            setFreq(freq + 500);
-          }}
-        >
-          +
-        </button>
-      </div>
-      <div>
-        <h5>Choose a color:</h5>
-        <ButtonDropdown
-          color="warning"
-          isOpen={dropdownOpen}
-          toggle={toggleDropColor}
-        >
-          <DropdownToggle caret>colors</DropdownToggle>
-          <DropdownMenu>
-            <DropdownItem
-              onClick={() => {
-                setCellColor("blue");
-              }}
-            >
-              Blue
-            </DropdownItem>
-            <DropdownItem
-              onClick={() => {
-                setCellColor("yellow");
-              }}
-            >
-              Yellow
-            </DropdownItem>
-            <DropdownItem
-              onClick={() => {
-                setCellColor("green");
-              }}
-            >
-              Green
-            </DropdownItem>
-            <DropdownItem
-              onClick={() => {
-                setCellColor("orange");
-              }}
-            >
-              Orange
-            </DropdownItem>
-            <DropdownItem
-              onClick={() => {
-                setCellColor(color);
-              }}
-            >
-              Random
-            </DropdownItem>
-          </DropdownMenu>
-        </ButtonDropdown>
-      </div>
-      <h2>Generations: {generation}</h2>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${numCols}, 20px)`,
-        }}
-      >
-        {grid.map((rows, index) =>
-          rows.map((col, colIdx) => (
-            <div
-              key={`${index}-${colIdx}}`}
-              onClick={() => {
-                //this stops the board from being clickable when its running.
-                if (!working) {
-                  const newGrid = produce(grid, (gridCopy) => {
-                    gridCopy[index][colIdx] = grid[index][colIdx] ? 0 : 1;
-                  });
-                  setGrid(newGrid);
-                }
-              }}
-              style={{
-                width: 20,
-                height: 20,
-                backgroundColor: grid[index][colIdx]
-                  ? `${cellColor}`
-                  : undefined,
-                border: `solid 1px black`,
-              }}
-            />
-          ))
-        )}
-      </div>
+              <ColorControlCard>
+                {/* <ColorTitle>Choose Life's Color:</ColorTitle> */}
+                <ButtonDropdown
+                  color="warning"
+                  isOpen={dropdownOpen}
+                  toggle={toggleDropColor}
+                >
+                  <DropdownToggle caret size="sm" outline color="info" block>
+                    Choose Life's Color
+                  </DropdownToggle>
+                  <DropdownMenu>
+                    <DropdownItem
+                      onClick={() => {
+                        setCellColor("blue");
+                      }}
+                    >
+                      Blue
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        setCellColor("yellow");
+                      }}
+                    >
+                      Yellow
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        setCellColor("green");
+                      }}
+                    >
+                      Green
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        setCellColor("orange");
+                      }}
+                    >
+                      Orange
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        setCellColor(color);
+                      }}
+                    >
+                      Random
+                    </DropdownItem>
+                  </DropdownMenu>
+                </ButtonDropdown>
+              </ColorControlCard>
+              <SpeedTitles>Generations: {generation}</SpeedTitles>
+              <GameBoardCard
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${numCols}, 20px)`,
+                }}
+              >
+                {grid.map((rows, index) =>
+                  rows.map((col, colIdx) => (
+                    <GameBoard
+                      key={`${index}-${colIdx}}`}
+                      onClick={() => {
+                        //this stops the board from being clickable when its running.
+                        if (!working) {
+                          const newGrid = produce(grid, (gridCopy) => {
+                            gridCopy[index][colIdx] = grid[index][colIdx]
+                              ? 0
+                              : 1;
+                          });
+                          setGrid(newGrid);
+                        }
+                      }}
+                      style={{
+                        width: 20,
+                        height: 20,
+                        backgroundColor: grid[index][colIdx]
+                          ? `${cellColor}`
+                          : "gray",
+                        border: `solid 1px #333`,
+                      }}
+                    />
+                  ))
+                )}
+              </GameBoardCard>
+
+              <GameSpeedCard class="speedOptions">
+                <SpeedTitles>Speed Controls:</SpeedTitles>
+                <br />
+
+                <Button
+                  outline
+                  color="danger"
+                  size="sm"
+                  onClick={() => {
+                    setFreq(30);
+                  }}
+                >
+                  Fast
+                </Button>
+
+                <Button
+                  outline
+                  color="primary"
+                  size="sm"
+                  onClick={() => {
+                    setFreq(freq);
+                  }}
+                >
+                  Normal
+                </Button>
+                <Button
+                  outline
+                  color="warning"
+                  size="sm"
+                  onClick={() => {
+                    setFreq(2000);
+                  }}
+                >
+                  Slow
+                </Button>
+                <br />
+                {/* <SpeedTitles>Speed up life by 1/2 second</SpeedTitles> */}
+                <Button
+                  outline
+                  color="info"
+                  size="sm"
+                  onClick={() => {
+                    setFreq(freq - 50);
+                  }}
+                >
+                  Increase Speed
+                </Button>
+                {/* <h5>Slow down life by 1/2 second</h5> */}
+                <Button
+                  outline
+                  color="info"
+                  size="sm"
+                  onClick={() => {
+                    setFreq(freq + 50);
+                  }}
+                >
+                  Decrease Speed
+                </Button>
+              </GameSpeedCard>
+            </Card>
+          </Col>
+          <Col sm="6">
+            <Card body>
+              <Info />
+            </Card>
+          </Col>
+        </Row>
+      </Background>
     </>
   );
 };
